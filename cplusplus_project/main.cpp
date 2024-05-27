@@ -679,7 +679,7 @@ public:
         Configuration * config = new Configuration("185.txt");
         cout << "Map Num Rows: " << config->map_num_rows << endl;
         cout << "Map Num Cols: " << config->map_num_cols << endl;
-        cout << "Max Num Moving Objects: " << config->map_num_moving_objects << endl;
+        cout << "Max Num Moving Objects: " << config->max_num_moving_objects << endl;
         cout << "Num Wall: " << config->num_walls << endl;
         if (config->num_walls != 0) {
             cout << "Array Wall: " << config->arr_walls->str() << endl;

@@ -63,110 +63,47 @@ enum RobotType
     SW
 };
 
-class MapElement{
-	friend class TestStudyInPink; 
-	protected: 
-		ElementType type; // Kieu thanh thanh ban do 
-	public: 
-		// constructor
-		MapElement(ElementType in_type){
-			this->type = in_type; 
-		}
-		// destructor
-		virtual ~MapElement(){}
-		// phuong thuc lay gia tri cua type 
-		virtual ElementType getType() const {return type;}
-};
-class Path: public MapElement{
-	friend class TestStudyInPink; 
-	public: 
-		// contructor 
-		Path(): MapElement(PATH){} 
-};
-
-class Wall: public MapElement{
-	friend class TestStudyInPink; 
-	public: 
-		// constructor 
-		Wall(): MapElement(WALL){}
-};
-/*
-	biểu diễn một bức tường giả, tên tội phạm vì là người tạo ra mê cung nên
-	nhận biết được tường giả, còn Sherlock bằng khả năng quan sát của mình thì có thể phát
-	hiện được tường giả này. Đối với Watson, FakeWall sẽ bị phát hiện (và di chuyển qua
-	được) nếu Watson có EXP lớn hơn EXP yêu cầu của FakeWall.
-*/
-class FakeWall: public MapElement{
-	friend class TestStudyInPink; 
-	private: 
-		int req_exp; // EXP toi thieu ma Waison can co de phat hien ra buc tuong
-	public: 
-		// constructor 
-		FakeWall(int in_reg_exp): MapElement(FAKE_WALL){
-			req_exp = in_reg_exp; 
-		}
-		int getReqExp() const {
-			return this->req_exp; 
-			/*
-				(r * 257 + c * 139 + 89)%900 + 1
-				r va c lan luot la vi tri theo hang va cot cua FakeWall
-			*/
-		}
-};
-class Position
+class MapElement
 {
     friend class TestStudyInPink;
 
-	private:
-		int r, c;
+protected:
+    ElementType type;
 
-	public:
-		Position(int r = 0, int c = 0){
-			this->r = r; 
-			this->c = c; 
-		}
-		Position(const string& str_pos){
-			sscanf(str_pos.c_str(), "(%d,%d)", &this->r, &this->c);
-		}
-		int getRow() const;
-		int getCol() const;
-		void setRow(int r);
-		void setCol(int c);
-		string str() const;
-		bool isEqual(int in_r, int in_c) const;
-		bool isEqual(Position pos) const; 
-		static const Position npos;
+public:
+    MapElement(ElementType in_type);
+    virtual ~MapElement();
+    virtual ElementType getType() const;
 };
-class MovingObject{
+
+class Path : public MapElement
+{
     friend class TestStudyInPink;
-	protected: 
-		int index; // vi tri cua doi tuong di chuyen trong mang cac doi tuong di chuyen, mang nay se mo to sau 
-		Position pos; // vi tri hien tai cua doi tuong 
-		Map *map; // ban do cho doi tuong nay di chuyen trong do 
-		string name; // doi tuong di chuyen
-	public: 
-		MovingObject(int index, const Position pos, Map * map, const string &name=""){
-			this->index = index; 
-			this->pos = pos; 
-			this->map = map; 
-			this->name = name; 
-		}
-		virtual ~MovingObject(){}
-		/*
-			Phuong thuc ao thuan to (pure virtual method) getNextPosition tra ve Position tiep theo ma 
-			doi tuong nay di chuyen den. Mat khac, trong truong hop khong co Position nao de doi tuong di chuyen den, ta dinh nghia mot gia tri de tra ve cho phuong thuc nay va luu trong bien npos cua class Position. 
-			Khi khong co Position de di chuyen den thi phuong thuc tra ve npos. 
-		*/
-		virtual Position getNextPosition() = 0; 
-		Position getCurrentPosition() const;
-		string getName(){
-			return this->name; 
-		}
-		// Method move thuc hien 1 buoc di chuyen cua doi tuong 
-		virtual void move() = 0; 
-		// Pure virutal method str tra ve chuoi bieu dien thong tin cua doi tuong 
-		virtual string str() const = 0; 
+
+public:
+    Path();
 };
+
+class Wall : public MapElement
+{
+    friend class TestStudyInPink;
+
+public:
+    Wall();
+};
+
+class FakeWall : public MapElement
+{
+    friend class TestStudyInPink;
+
+private:
+    int req_exp;
+
+public:
+    FakeWall(int in_req_exp);
+    int getReqExp() const;
+};
+
 class Map
 {
     friend class TestStudyInPink;
@@ -181,76 +118,85 @@ public:
     bool isValid(const Position &pos, MovingObject *mv_obj) const;
 };
 
-class Character: public MovingObject{
-	friend class TestStudyInPink; 
-	public: 
-		int hp; 
-		int exp; 
-		Character(int index, const Position pos, Map * map, const string & name , int init_hp, int init_exp): MovingObject(index, pos, map, name){
-			this->hp = init_hp; 
-			this->exp = init_exp; 
-		}
-		~Character(){} 
-		virtual Position getNextPosition() override = 0;
-		Position getCurrentPosition() const{
-			return this->pos;
-		}
-		void setCurrentPosition(Position pos){
-			this->pos = pos; 
-		}
-		virtual void move() override = 0; 
-		virtual string str() const override = 0; 
-		int getHp(){return this->hp;}
-		int getExp(){return this->exp;}
-		void setExp(int exp){this->exp = exp;}
-		void setHp(int hp){this->hp = hp;}
-}; 
+class Position
+{
+    friend class TestStudyInPink;
+
+private:
+    int r, c;
+
+public:
+    Position(int r = 0, int c = 0);
+    Position(const string &str_pos);
+    int getRow() const;
+    int getCol() const;
+    void setRow(int r);
+    void setCol(int c);
+    string str() const;
+    bool isEqual(int in_r, int in_c) const;
+    bool isEqual(Position pos) const;
+    static const Position npos;
+};
+
+class MovingObject
+{
+    friend class TestStudyInPink;
+
+protected:
+    int index;
+    Position pos;
+    Map *map;
+    string name;
+
+public:
+    MovingObject(int index, const Position pos, Map *map, const string &name = "");
+    string getname();
+    int getIndex() {return index;};
+    virtual ~MovingObject();
+    virtual Position getNextPosition() = 0;
+    void setPosition(Position pos)
+    {
+        this->pos = pos;
+    }
+
+    Position getCurrentPosition() const;
+    virtual void move() = 0;
+    virtual string str() const = 0;
+};
+class Character : public MovingObject
+{
+    friend class TestStudyInPink;
+
+protected:
+    int hp;
+    int exp;
+
+public:
+    Character(int index, const Position pos, Map *map, string character_type, int hp, int exp);
+    int getExp();
+    void setExp(int in_exp);
+    int getHp();
+    void setHp(int in_hp);
+    virtual ~Character(){};
+    virtual Position getNextPosition() override = 0;
+    virtual void move() override = 0;
+    virtual string str() const override = 0;
+};
+
 class Sherlock : public Character
 {
     friend class TestStudyInPink;
 
-    private:
-        // TODO
-        string moving_rule;
-		int global_count; 
-    public:
-		/*
-			- moving rule: mô tả cách thức mà Sherlock di chuyển. 
-				Đây là một chuỗi mà các ký tự chỉ có thể là một trong 4 giá trị: 
-				 + 'L' (Left - đi sang trái) 
-				 + 'R' (Right - đi sang phải)
-				 + 'U' (Up - đi lên)
-				 + 'D' (Down - đi xuống dưới)
-				Ví dụ về moving_rule là "LU". 
-			- init_hp: HP ban đầu của SherLock. HP nằm trong khoảng [0,500]. Nếu HP vượt quá 500 thì được cài đặt về 500, 
-				nếu HP bằng 0 thì coi như SherLock đã hết thể lực và không thể di chuyến tiếp trong mê cung. 
-				Nếu HP của cả SherLock và Watson đều bằng 0 thì SherLock và Watson bị thua trong cuộc truy đuổi với tên tội phạm. 
-			- init_exp: EXP ban đầu của SherLock. EXP nằm trong khoảng [0, 900]. Nếu HP vượt quá 900 thì cài đặt về 900, 
-				nếu EXP bằng 0 thì SherLock cũng sẽ không di chuyển tiếp trong mê cung. 
-			- Tham số name của Constructor MovingObject được truyền vào giá trị "Sherlock". 
-			- SherLock có thêm các thuộc tính hp và exp; 
-  		*/
-        Sherlock(int index, const string & moving_rule, const Position &init_pos, Map*map, int init_hp, int init_exp) : Character(index, init_pos, map, "Sherlock", init_hp, init_exp){
-			this->moving_rule = moving_rule; 
-			// khoi tao hp 
-			if(init_hp > 500){
-				this->hp = 500; 
-			}else if(init_hp < 0){
-				this->hp = 0; 
-			}
-			// khoi tao exp 
-			if(init_exp > 900){
-				this->exp = 900; 
-			}else if(init_exp < 0){
-				this->exp = 0; 
-			}else{
-				this->exp = init_exp; 	
-			}
-			global_count = 0; 
-		}
-        virtual Position getNextPosition() override;
-        virtual void move() override;
-        virtual string str() const override;
+private:
+    // TODO
+    string moving_rule;
+    int move_index;
+
+public:
+    Sherlock(int index, const string &moving_rule, const Position &init_pos, Map *map, int init_hp, int init_exp);
+    virtual Position getNextPosition() override;
+    virtual void move() override;
+    virtual string str() const override;
     // ...
 };
 
@@ -258,61 +204,35 @@ class Watson : public Character
 {
     friend class TestStudyInPink;
 
-    private:
-        // TODO
-        string moving_rule;
-		int global_count; 
-    public:
-        Watson(int index, const string & moving_rule, const Position &init_pos, Map*map, int init_hp, int init_exp) : Character(index, init_pos, map, "Watson", init_hp, init_exp){
-			this->moving_rule = moving_rule; 
-			// khoi tao hp 
-			if(init_hp > 500){
-				this->hp = 500; 
-			}else if(init_hp < 0){
-				this->hp = 0; 
-			}else{
-				this->hp = init_hp;	
-			} 
-			// khoi tao exp 
-			if(init_exp > 900){
-				this->exp = 900; 
-			}else if(init_exp < 0){
-				this->exp = 0; 
-			}else{
-				this->exp = init_exp; 	
-			}
-			global_count = 0; 
-		}
-        virtual Position getNextPosition() override;
-        virtual void move() override;
-        virtual string str() const override;
-        int getExp() { return this->exp; }
+private:
+    // TODO
+    string moving_rule;
+    int move_index;
+
+public:
+    Watson(int index, const string &moving_rule, const Position &init_pos, Map *map, int init_hp, int init_exp);
+    virtual Position getNextPosition() override;
+    virtual void move() override;
+    virtual string str() const override;
+    int getExp() const { return exp; };
 };
 
 class Criminal : public Character
 {
     friend class TestStudyInPink;
 
-    private:
-        // TODO
-        Sherlock *sherlock;
-        Watson *watson;
-        Position previous_pos;
+private:
+    // TODO
+    Sherlock *sherlock;
+    Watson *watson;
+    Position prevpos;
 
-    public:
-        Criminal(int index, const Position & init_pos, Map * map, Sherlock * sherlock, Watson * watson) : Character(index, init_pos, map, "Criminal", 0, 0){
-			this->sherlock = sherlock; 
-			this->watson = watson; 
-		}
-		~Criminal(){
-			delete sherlock; 
-			delete watson;
-		}
-        Position getPrevious_pos(); 
-        int getDistanceObj(MovingObject * obj1, Position pos);
-        virtual Position getNextPosition() override;
-        virtual void move() override;
-        virtual string str() const override;
+public:
+    Criminal(int index, const Position &init_pos, Map *map, Sherlock *sherlock, Watson *watson);
+    Position get_prevpos();
+    virtual Position getNextPosition() override;
+    virtual void move() override;
+    virtual string str() const override;
     // ...
 };
 
@@ -320,26 +240,20 @@ class ArrayMovingObject
 {
     friend class TestStudyInPink;
 
-    private:
-        // TODO
-        int count;
-        int capacity;
-        MovingObject **arr_mv_objs;
+private:
+    // TODO
+    int count;
+    int capacity;
+    MovingObject **arr_mv_objs;
 
-    public:
-        ArrayMovingObject(int capacity){
-			this->capacity = capacity; 
-			this->count = 0; 
-			this->arr_mv_objs = new MovingObject*[capacity]; 
-		}
-		~ArrayMovingObject(){
-			delete[] arr_mv_objs; 
-		}
-        bool isFull() const;
-        bool add(MovingObject* mv_obj);
-        MovingObject* get(int index) const;
-        int size() const; // tra ve kich thuoc hien tai 
-        string str() const;
+public:
+    ArrayMovingObject(int capacity);
+    ~ArrayMovingObject();
+    bool isFull() const;
+    bool add(MovingObject *mv_obj);
+    MovingObject *get(int index) const;
+    int size() const; // return current number of elements in the array
+    string str() const;
 };
 
 class Configuration
@@ -347,32 +261,31 @@ class Configuration
     friend class TestStudyInPink;
     friend class StudyPinkProgram;
 
-    private:
-        int map_num_rows; // so hang cua ban do  
-		int map_num_cols; // so cot cua ban do 
-		int map_num_moving_objects; // so luong phan tu toi da cua mang cac doi tuong di chuyen 
-		int num_walls;  // so luong doi tuong wall 
-		Position* arr_walls; // danh sach cac vi tri cua cac Wall
-		int num_fake_walls; // so luong doi tuong fakewall
-		Position* arr_fake_walls; // danh sach cac vi tri cua cac FakeWall 
-		string sherlock_moving_rule; // moving_rule cua Sherlock
-		Position sherlock_init_pos; // vi tri ban dau cua Sherlock
-		int sherlock_init_hp; 
-		int sherlock_init_exp; 
-		string watson_moving_rule; // moving rule cua Watson
-		Position watson_init_pos; // vi tri ban dau cua watson 
-		int watson_init_hp; 
-		int watson_init_exp; 
-		Position criminal_init_pos; // vi tri ban dau cua ten toi pham 
-		int num_steps; // so vong lap ma chuong trinh se thuc hien
+private:
+    // TODO
+    int map_num_rows;
+    int map_num_cols;
+    int max_num_moving_objects;
+    int num_walls;
+    Position *arr_walls;
+    int num_fake_walls;
+    Position *arr_fake_walls;
+    string sherlock_moving_rule;
+    Position sherlock_init_pos;
+    int sherlock_init_hp;
+    int sherlock_init_exp;
+    string watson_moving_rule;
+    Position watson_init_pos;
+    int watson_init_hp;
+    int watson_init_exp;
+    Position criminal_init_pos;
+    int num_steps;
 
-    public:
-		Configuration(const string & filepath);
-		~Configuration();
-        string str() const ;
+public:
+    Configuration(const string &filepath);
+    ~Configuration();
+    string str() const;
 };
-
-// Robot, BaseItem, BaseBag,...
 class Robot : public MovingObject
 {
     friend class TestStudyInPink;
